@@ -29,7 +29,7 @@ export const FILE_NAMES = {
   model: 'model.glb',
   annotation: 'annotation.glb',
   table: 'annotation.csv',
-  meta: 'meta.json',
+  meta: ['meta.csv', 'meta.json'],   // 資料情報。この順に探し、先に見つかった方を使う
 };
 
 // 1つしかないなら data/、2つ以上なら data/<id>/
@@ -89,7 +89,7 @@ export function normalizeCatalog(raw) {
       it.annotations = spec;
     }
     if (it.meta === false) it.meta = null;
-    else if (!it.meta) { it.meta = it.folder + FILE_NAMES.meta; it.metaOptional = true; }
+    else if (!it.meta) { it.meta = FILE_NAMES.meta.map((name) => it.folder + name); it.metaOptional = true; }
   });
   return c;
 }

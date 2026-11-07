@@ -15,8 +15,7 @@ import {
   buildAnnotations, pickAnnotation, pickModel, placePosition, buildPose, displayMode, findEntry,
 } from './common.js?v=__BUILD__';
 import { createPanel } from './panel.js?v=__BUILD__';
-import { loadAnnotationData } from './annotations.js?v=__BUILD__';
-import { fetchOptional } from './catalog.js?v=__BUILD__';
+import { loadAnnotationData, loadMeta } from './annotations.js?v=__BUILD__';
 
 const $ = (id) => document.getElementById(id);
 const MAX_LOADED = 6;     // 同時に持つモデルの数の上限（iPhoneのメモリ不足を避ける）。いま見ている図面の分は必ず持つ
@@ -76,7 +75,7 @@ export function runArPage(engine) {
     const { item } = slot;
     slot.loading = Promise.all([
       loadItemObject(item, (p) => { if (!core.active || core.active === slot.stage) showHint(`モデルを読み込み中… ${Math.round(p * 100)}%`); }),
-      item.meta ? fetchOptional(item.meta).catch(() => null) : null,
+      loadMeta(item).catch(() => null),
       loadAnnotationData(item).catch((err) => { console.warn(err); return null; }),
     ]).then(([model, meta, annoData]) => {
       const pose = buildPose(item, model);

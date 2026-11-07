@@ -83,6 +83,49 @@ export function decodeText(buffer) {
   }
 }
 
+/* ---------- 資料情報（meta.csv・meta.json） ---------- */
+
+// 資料情報の表：1列目が項目名、2列目が中身（3列目から右は使わない）。
+// 「資料名」の行は題名に、「注意書き」の行は注意書きに使う。1行目が「項目,内容」のような見出しなら飛ばす
+const META_HEADER = ['項目', '項目名'];
+const META_TITLE = ['資料名', '題名'];
+const META_NOTICE = ['注意書き'];
+export function parseMeta(text) {
+  const meta = { title: '', fields: [], notice: '' };
+  const notices = [];
+  let first = true;
+  for (const cells of splitCsv(text)) {
+    const label = (cells[0] || '').trim();
+    const value = (cells[1] || '').trim();
+    if (!label && !value) continue;
+    const k = normalizeKey(label);
+    const isHeader = first && META_HEADER.includes(k);
+    first = false;
+    if (isHeader || !label) continue;
+    if (META_TITLE.includes(k)) meta.title = value;
+    else if (META_NOTICE.includes(k)) { if (value) notices.push(value); }
+    else meta.fields.push({ label, value });
+  }
+  meta.notice = notices.join(' ');
+  return meta;
+}
+
+// 資料情報を読む。item.meta はファイルの場所（1つ、または探す順の一覧）。
+// .json で終わる名前は JSON、それ以外は表として読む。無い・読めないときは null
+export async function loadMeta(item) {
+  for (const path of [].concat(item.meta || [])) {
+    const res = await fetch(siteUrl(path), { cache: 'no-cache' }).catch(() => null);
+    if (!res || !res.ok) continue;
+    try {
+      return /\.json$/i.test(path) ? await res.json() : parseMeta(decodeText(await res.arrayBuffer()).text);
+    } catch (err) {
+      console.warn(`${path} を読めません`, err);
+      return null;
+    }
+  }
+  return null;
+}
+
 function splitCsv(text) {
   const firstLine = text.split(/\r?\n/, 1)[0];
   const sep = firstLine.includes('\t') ? '\t' : ',';

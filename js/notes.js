@@ -1,6 +1,6 @@
 // 注記一覧：資料情報と注記を表にまとめる（報告書作成に向けた整理用）。CSV保存と印刷ができる
-import { loadCatalogData, siteUrl, shareUrl } from './catalog.js?v=__BUILD__';
-import { loadAnnotationData, pathLength, surfaceArea } from './annotations.js?v=__BUILD__';
+import { loadCatalogData, shareUrl } from './catalog.js?v=__BUILD__';
+import { loadAnnotationData, loadMeta, pathLength, surfaceArea } from './annotations.js?v=__BUILD__';
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -10,12 +10,6 @@ const el = (tag, cls, text) => {
   return n;
 };
 const TYPE = { Point: '点', Line: '線', Area: '面' };
-
-async function json(path) {
-  if (!path) return null;
-  const res = await fetch(siteUrl(path), { cache: 'no-cache' });
-  return res.ok ? res.json().catch(() => null) : null;
-}
 
 // 線は折れ線の長さ、面は境界の一周の長さ（GLB の座標 × metersPerUnit。glTF の単位はメートル）。
 // 線が何本かに分かれているものは合計する
@@ -41,7 +35,7 @@ list.innerHTML = '';
 
 for (const item of items) {
   const [meta, anno] = await Promise.all([
-    json(item.meta),
+    loadMeta(item).catch(() => null),
     loadAnnotationData(item).catch((err) => ({ layers: [], warnings: [err.message] })),
   ]);
   const scale = item.model.metersPerUnit == null ? 1 : item.model.metersPerUnit;

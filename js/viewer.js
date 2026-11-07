@@ -7,8 +7,7 @@ import {
   syncLineResolution, placePosition, buildPose, displayMode, findEntry,
 } from './common.js?v=__BUILD__';
 import { createPanel } from './panel.js?v=__BUILD__';
-import { loadAnnotationData } from './annotations.js?v=__BUILD__';
-import { fetchOptional } from './catalog.js?v=__BUILD__';
+import { loadAnnotationData, loadMeta } from './annotations.js?v=__BUILD__';
 import { shareUrl } from './catalog.js?v=__BUILD__';
 
 const $ = (id) => document.getElementById(id);
@@ -53,7 +52,7 @@ async function main() {
   const withSheet = displayMode(item) === 'plan' && !!drawing.viewerImage;
   const [model, meta, annoData, sheetTexture] = await Promise.all([
     loadItemObject(item, (p) => showHint(`読み込み中… ${Math.round(p * 100)}%`)),
-    item.meta ? fetchOptional(item.meta).catch(() => null) : null,
+    loadMeta(item).catch(() => null),
     loadAnnotationData(item).catch((err) => { console.warn(err); return null; }),
     withSheet ? loadTexture(drawing.viewerImage).catch(() => null) : null,
   ]);

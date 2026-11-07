@@ -2,7 +2,7 @@
 import { Compiler } from '../lib/mindar/mindar-image.prod.js?v=__BUILD__';
 import { extractDense, makeZoomLevels, toGray, ZOOM_PURPOSE, ZOOM_MAX_POINTS } from '../js/trackpoints.js?v=__BUILD__';
 import { loadCatalogData, siteUrl, MIND_FILE } from '../js/catalog.js?v=__BUILD__';
-import { loadAnnotationSources, glbBounds, collectUnits, matchDrawing } from '../js/annotations.js?v=__BUILD__';
+import { loadAnnotationSources, glbBounds, collectUnits, matchDrawing, decodeText, parseMeta } from '../js/annotations.js?v=__BUILD__';
 
 const $ = (id) => document.getElementById(id);
 const ROOT = new URL('..', import.meta.url);
@@ -185,12 +185,17 @@ async function checkFiles() {
     }
 
     if (item.meta) {
-      await guard(item.meta, async () => {
-        const f = await probe(item.meta);
-        if (!f) { row(item.meta, 'なし', '資料情報を出しません（無くてもよい）', 'none'); return; }
-        const meta = JSON.parse(new TextDecoder().decode(f.buffer));
+      const paths = [].concat(item.meta);
+      await guard(paths.join(' / '), async () => {
+        let path = null, f = null;
+        for (const p of paths) { f = await probe(p); if (f) { path = p; break; } }
+        if (!f) { row(paths.join(' / '), 'なし', '資料情報を出しません（無くてもよい）', 'none'); return; }
+        const text = decodeText(f.buffer).text;
+        const meta = /\.json$/i.test(path) ? JSON.parse(text) : parseMeta(text);
         const n = (meta.fields || []).filter((x) => String(x.value || '').trim()).length;
-        row(item.meta, 'OK', `題名「${meta.title || ''}」、項目 ${n}`);
+        const unused = [];
+        for (const p of paths.slice(paths.indexOf(path) + 1)) if (await probe(p)) unused.push(p);
+        row(path, 'OK', `題名「${meta.title || '（台帳の資料名）'}」、入力済みの項目 ${n}${meta.notice ? '、注意書きあり' : ''}${unused.length ? `（${unused.join('、')} もあるが使わない）` : ''}`);
       });
     }
   }
