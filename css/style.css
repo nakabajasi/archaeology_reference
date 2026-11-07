@@ -115,14 +115,16 @@ body.viewer-page { background: radial-gradient(120% 90% at 50% 35%, #f3f0e8 0%, 
   pointer-events: none;
 }
 
-/* 注意書き（急な動き・近すぎ・認識が不安定）。モデルは隠さず、上の方に目立つ色で出す */
+/* 注意書き（急な動き・近すぎ・認識が不安定）。モデルの邪魔にならないよう、上のボタンの列のすぐ下（画面の上端）に細く出す。
+   案内（hint）が同時に出るときは、案内をその下へずらす */
 .warn-bar {
-  position: fixed; z-index: 17; left: 16px; right: 16px; top: calc(108px + env(safe-area-inset-top));
-  width: fit-content; max-width: calc(100% - 32px); margin: 0 auto; padding: 8px 14px; border-radius: 4px;
-  background: #ffcf3f; color: #1d1600; font-size: 0.92rem; font-weight: 700; text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); pointer-events: none;
+  position: fixed; z-index: 17; left: 10px; right: 10px; top: calc(54px + env(safe-area-inset-top));
+  width: fit-content; max-width: calc(100% - 20px); margin: 0 auto; padding: 4px 12px; border-radius: 4px;
+  background: #ffcf3f; color: #1d1600; font-size: 0.82rem; font-weight: 700; line-height: 1.4; text-align: center;
+  pointer-events: none;
 }
 .warn-bar[hidden] { display: none; }
+.warn-bar:not([hidden]) + .hint { top: calc(88px + env(safe-area-inset-top)); }
 
 /* 設定の食い違い（all.mind と図面画像など）。消えない */
 .config-warn {
