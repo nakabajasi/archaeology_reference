@@ -46,7 +46,12 @@ for (const item of items) {
   const fields = ((meta && meta.fields) || []).filter((f) => String(f.value || '').trim());
   if (fields.length) {
     const dl = el('dl', 'fields light');
-    for (const f of fields) dl.append(el('dt', null, f.label), el('dd', null, f.value));
+    for (const f of fields) {
+      const v = String(f.value).trim();
+      const dd = el('dd', null, /^https?:\/\/\S+$/i.test(v) ? null : v);
+      if (!dd.textContent) { const a = el('a', null, v); a.href = v; a.target = '_blank'; a.rel = 'noopener'; dd.append(a); }   // URL は押せるリンクに
+      dl.append(el('dt', null, f.label), dd);
+    }
     section.append(dl);
   }
   if (meta && meta.notice) section.append(el('p', 'callout', meta.notice));

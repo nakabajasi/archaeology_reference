@@ -192,6 +192,7 @@ body.viewer-page { background: radial-gradient(120% 90% at 50% 35%, #f3f0e8 0%, 
 .fields { display: grid; grid-template-columns: minmax(5.5em, auto) 1fr; gap: 4px 14px; margin: 0; font-size: 0.9rem; }
 .fields dt { color: var(--panel-ink-2); }
 .fields dd { margin: 0; overflow-wrap: anywhere; }
+.fields dd a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px;

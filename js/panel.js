@@ -10,11 +10,22 @@ const el = (tag, cls, text) => {
   return n;
 };
 
+// 中身が URL（http:// か https:// で始まる1つの文字列）だけなら、押せるリンクにする（新しいタブで開く）
+function fieldValue(value) {
+  const v = String(value).trim();
+  if (!/^https?:\/\/\S+$/i.test(v)) return el('dd', null, v);
+  const dd = el('dd');
+  const a = el('a', null, v);
+  a.href = v; a.target = '_blank'; a.rel = 'noopener';
+  dd.append(a);
+  return dd;
+}
+
 function fieldList(pairs) {
   const dl = el('dl', 'fields');
   for (const [label, value] of pairs) {
     if (value == null || String(value).trim() === '') continue; // 未入力の項目は出さない
-    dl.append(el('dt', null, label), el('dd', null, String(value)));
+    dl.append(el('dt', null, label), fieldValue(value));
   }
   return dl;
 }
