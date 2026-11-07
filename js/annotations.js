@@ -447,6 +447,8 @@ export function matchDrawing(nodes, table) {
     const row = rowsByKey.get(u.id);
     if (row) matched.push({ unit: u, row }); else drawingOnly.push(u);
   }
+  // 表の行の順に並べる（一覧・レイヤーの順が、Blender での並びではなく遺構一覧表の順になる）
+  matched.sort((a, b) => a.row.line - b.row.line);
   const used = new Set(matched.map((m) => m.row));
   const tableOnly = table ? [...rowsByKey.values()].filter((r) => !used.has(r)) : [];
   return { units, matched, drawingOnly, tableOnly, duplicates };
