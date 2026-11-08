@@ -62,7 +62,8 @@ export async function loadItemObject(item, onProgress) {
 
 async function loadModel(item, onProgress) {
   const gltf = await gltfLoader.loadAsync(url(item.model.src), (e) => {
-    if (onProgress && e.total) onProgress(e.loaded / e.total);
+    // 圧縮して送られると、受け取った量が予定の量（e.total）を超えることがある。100% で止める
+    if (onProgress && e.total) onProgress(Math.min(1, e.loaded / e.total));
   });
 
   const raw = new THREE.Group();
